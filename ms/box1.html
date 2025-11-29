@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Mahasiswa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .kebijakan-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 5px;
+        }
+        .file-link {
+            color: #2196F3;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Halaman Mahasiswa</h1>
+        <p>Selamat datang di halaman mahasiswa Akademi Analis Kesehatan Delima Husada Gresik</p>
+    </header>
+    
+    <div class="container">
+        <h2>Konten Mahasiswa</h2>
+        <p>Ini adalah halaman untuk mahasiswa. Akses materi, jadwal, dan informasi akademik di sini.</p>
+        
+        <div class="kebijakan-section">
+            <h3>Kebijakan Akademi</h3>
+            <div id="display-kebijakan"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load kebijakan dari server
+        const roles = ['Direktur', 'Kaprodi'];
+        const displayDiv = document.getElementById('display-kebijakan');
+        
+        roles.forEach(role => {
+            fetch(`http://localhost/savekebijakan/save_kebijakan.php?role=${role}`) // Ganti dengan URL server Anda
+            .then(response => response.json())
+            .then(data => {
+                if (data.text) {
+                    const roleDiv = document.createElement('div');
+                    roleDiv.innerHTML = '<h4>Kebijakan dari ' + role + ':</h4><p>' + data.text + '</p>';
+                    if (data.file_name) {
+                        const fileLink = document.createElement('a');
+                        fileLink.href = data.file_data;
+                        fileLink.download = data.file_name;
+                        fileLink.textContent = 'Download File: ' + data.file_name;
+                        fileLink.className = 'file-link';
+                        roleDiv.appendChild(fileLink);
+                    }
+                    displayDiv.appendChild(roleDiv);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+        
+        if (!displayDiv.innerHTML.trim()) {
+            displayDiv.textContent = 'Belum ada kebijakan yang dikirim.';
+        }
+    </script>
+</body>
+</html>

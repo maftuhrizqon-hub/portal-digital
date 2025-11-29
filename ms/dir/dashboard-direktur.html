@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Direktur - Akademi Analis Kesehatan Delima Husada Gresik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        nav {
+            background: #333;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            margin-bottom: 20px;
+        }
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .menu-item {
+            background: #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .menu-item:hover {
+            background: #d0d0d0;
+        }
+        .kirim-kebijakan-mahasiswa {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .hapus-btn {
+            background: #f44336;
+        }
+        .hapus-btn:hover {
+            background: #d32f2f;
+        }
+        .logout-btn {
+            background: #f44336;
+        }
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dashboard Direktur</h1>
+        <p>Selamat datang di portal manajemen Akademi Analis Kesehatan Delima Husada Gresik</p>
+    </header>
+    
+    <nav>
+        <a href="#profile">Profile</a>
+        <a href="#laporan">Laporan</a>
+        <a href="#kebijakan">Kebijakan</a>
+        <button class="logout-btn" id="logout-btn">Logout</button>
+    </nav>
+    
+    <div class="container">
+        <div class="user-info">
+            <h2>Informasi Akun</h2>
+            <p><strong>Username:</strong> <span id="display-username"></span></p>
+            <p><strong>Role:</strong> <span id="display-role"></span></p>
+        </div>
+        
+        <h2>Menu Khusus Direktur</h2>
+        <div class="menu">
+            <div class="menu-item" onclick="window.location.href='kelola-kebijakan.html'">Kelola Kebijakan</div>
+            <div class="menu-item" onclick="window.location.href='laporan-keuangan.html'">Laporan Keuangan</div>
+            <div class="menu-item" onclick="window.location.href='manajemen-staf.html'">Manajemen Staf</div>
+            <div class="menu-item" onclick="window.location.href='evaluasi-program.html'">Evaluasi Program</div>
+        </div>
+        
+        <div class="kirim-kebijakan-mahasiswa">
+            <h3>Kirim Kebijakan ke Mahasiswa</h3>
+            <textarea id="kebijakan-mahasiswa-text" placeholder="Masukkan kebijakan khusus untuk mahasiswa..."></textarea>
+            <input type="file" id="upload-file-mahasiswa" accept=".pdf,.doc,.docx,.txt">
+            <button id="kirim-kebijakan-mahasiswa-btn">Kirim Kebijakan ke Mahasiswa</button>
+            <button class="hapus-btn" id="hapus-kebijakan-mahasiswa-btn">Hapus Kebijakan Mahasiswa</button>
+        </div>
+    </div>
+
+    <script>
+        // Ambil data dari localStorage
+        const username = localStorage.getItem('username');
+        const role = localStorage.getItem('role');
+        const loggedIn = localStorage.getItem('loggedIn');
+        
+        if (loggedIn === 'true' && username && role === 'Direktur') {
+            document.getElementById('display-username').textContent = username;
+            document.getElementById('display-role').textContent = role;
+        } else {
+            alert('Akses ditolak. Anda bukan Direktur atau belum login.');
+            window.location.href = '../login-tenaga.html';
+        }
+        
+        // Fungsi encode file
+        function encodeFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Kirim kebijakan ke mahasiswa (ke server)
+        document.getElementById('kirim-kebijakan-mahasiswa-btn').addEventListener('click', async function() {
+            const kebijakanText = document.getElementById('kebijakan-mahasiswa-text').value;
+            const fileInput = document.getElementById('upload-file-mahasiswa');
+            let fileData = '';
+            let fileName = '';
+            
+            if (fileInput.files[0]) {
+                fileData = await encodeFileToBase64(fileInput.files[0]);
+                fileName = fileInput.files[0].name;
+            }
+            
+            if (kebijakanText.trim() || fileName) {
+                const formData = new FormData();
+                formData.append('role', 'Direktur');
+                formData.append('text', kebijakanText);
+                formData.append('file_data', fileData);
+                formData.append('file_name', fileName);
+                
+                fetch('http://localhost/savekebijakan/save_kebijakan.php?', { // Ganti dengan URL server Anda
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Kebijakan berhasil dikirim ke mahasiswa!');
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => alert('Error: ' + error));
+            } else {
+                alert('Harap isi kebijakan atau upload file.');
+            }
+        });
+        
+         // Hapus kebijakan mahasiswa (ke server)
+    document.getElementById('hapus-kebijakan-mahasiswa-btn').addEventListener('click', function() {
+        if (confirm('Apakah Anda ingin menghapus kebijakan mahasiswa?')) {
+            fetch('http://localhost/savekebijakan/save_kebijakan.php?role=Direktur', { // Ganti URL
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Kebijakan mahasiswa berhasil dihapus!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => alert('Error: ' + error));
+        }
+    });
+        
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            if (confirm('Apakah Anda ingin logout?')) {
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                localStorage.removeItem('loggedIn');
+                window.location.href = '../index.html';
+            }
+        });
+        
+        // Navigasi sederhana
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = this.getAttribute('href');
+                if (target === '#profile') {
+                    document.querySelector('.user-info').scrollIntoView({ behavior: 'smooth' });
+                } else if (target === '#laporan') {
+                    alert('Laporan: Fitur laporan keuangan akan ditampilkan di sini.');
+                } else if (target === '#kebijakan') {
+                    document.querySelector('.kirim-kebijakan-mahasiswa').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

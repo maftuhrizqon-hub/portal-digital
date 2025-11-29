@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Tenaga Kerja</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f4f4f4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .fade-in {
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .back-link {
+            margin-top: 15px;
+        }
+        .back-link a {
+            color: #2196F3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="../ms/logo/logo.png">
+        <h2 class="fade-in">Analis Kesehatan Delima Husada Gresik!</h2>
+        
+    </div>
+
+    <div class="login-container">
+        <p>Login Sesuai Tenaga Kerja Anda</p>
+        <form id="loginFormTenaga">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required placeholder="Masukkan username">
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required placeholder="Masukkan password">
+            
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="">Pilih Sesuai Jabatan Anda</option>
+                <option value="Direktur">Direktur</option>
+                <option value="Kaprodi">Kaprodi</option>
+                <option value="BBM">BBM</option>
+                <option value="Humas">Humas</option>
+                <option value="BAAK">BAAK</option>
+                <option value="LPPM">LPPM</option>
+                <option value="BAU">BAU</option>
+                <option value="lainnya">Lainnya</option>
+            </select>
+            
+            <button type="submit">Login</button>
+        </form>
+        <p class="back-link"><a href="index.html">Kembali ke Beranda</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginFormTenaga').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            
+            if (username && password && role) {
+                // Kredensial contoh sesuai role
+                const validCredentials = {
+                    'Direktur': { username: '1', password: '1' },
+                    'Kaprodi': { username: 'kaprodi1', password: 'kap123' },
+                    'BBM': { username: 'bbm1', password: 'bbm123' },
+                    'Humas': { username: 'humas1', password: 'hum123' },
+                    'BAAK': { username: 'baak1', password: 'baa123' },
+                    'LPPM': { username: 'lppm1', password: 'lpp123' },
+                    'BAU': { username: 'bau1', password: 'bau123' },
+                    'lainnya': { username: 'lain1', password: 'lain123' }
+                };
+                
+                // Validasi username dan password sesuai role
+                if (validCredentials[role] && validCredentials[role].username === username && validCredentials[role].password === password) {
+                    // Simpan data ke localStorage
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('password', password);
+                    localStorage.setItem('role', role);
+                    localStorage.setItem('loggedIn', 'true');
+                    
+                    alert('Login berhasil sebagai ' + role + '! Selamat datang, ' + username);
+                    
+                    // Redirect sesuai role
+                    let redirectPage = 'index.html'; // Default
+                    if (role === 'Direktur') {
+                        redirectPage = '../ms/dir/dashboard-direktur.html';
+                    } else if (role === 'Kaprodi') {
+                        redirectPage = '../ms/kap/dashboard-kaprodi.html';
+                    } else if (role === 'BBM') {
+                        redirectPage = 'dashboard-bbm.html';
+                    } else if (role === 'Humas') {
+                        redirectPage = 'dashboard-humas.html';
+                    } else if (role === 'BAAK') {
+                        redirectPage = 'dashboard-baak.html';
+                    } else if (role === 'LPPM') {
+                        redirectPage = 'dashboard-lppm.html';
+                    } else if (role === 'BAU') {
+                        redirectPage = 'dashboard-bau.html';
+                    } else {
+                        redirectPage = 'dashboard-lainnya.html';
+                    }
+                    
+                    window.location.href = redirectPage;
+                } else {
+                    alert('Username atau password salah untuk role ' + role + '.');
+                }
+            } else {
+                alert('Harap isi semua field termasuk role.');
+            }
+        });
+    </script>
+</body>
+</html>
