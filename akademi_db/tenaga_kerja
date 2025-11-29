@@ -1,0 +1,16 @@
+CREATE DATABASE akademi_db;
+
+USE akademi_db;
+
+CREATE TABLE tenaga_kerja (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('dosen', 'staf', 'laboran', 'lainnya') NOT NULL,
+    nama VARCHAR(100) NOT NULL
+);
+
+-- Contoh data
+INSERT INTO tenaga_kerja (username, password, role, nama) VALUES
+('dosen1', '$2y$10$examplehashedpassword', 'dosen', 'Dr. Ahmad'),
+('staf1', '$2y$10$examplehashedpassword', 'staf', 'Siti Aminah');

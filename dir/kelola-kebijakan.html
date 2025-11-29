@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Kebijakan - Dashboard Direktur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        header {
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .kebijakan-editor {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .back-btn {
+            background: #2196F3;
+        }
+        .back-btn:hover {
+            background: #0b7dda;
+        }
+        .saved-kebijakan {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 4px;
+        }
+        .kebijakan-item {
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+            position: relative;
+        }
+        .button-group {
+            position: absolute;
+            right: 0;
+            top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .edit-btn, .delete-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .edit-btn:hover {
+            background: #e68900;
+        }
+        .delete-btn {
+            background: #f44336;
+        }
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        .file-link {
+            color: #2196F3;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Kelola Kebijakan Akademi</h1>
+        <p>Halaman untuk mengelola kebijakan institusi</p>
+    </header>
+    
+    <div class="container">
+        <h2>Fitur Kelola Kebijakan</h2>
+        <div id="add-form">
+            <p>Klik di area di bawah untuk edit kebijakan baru:</p>
+            <div class="kebijakan-editor" contenteditable="true" id="kebijakan-editor">
+                Masukkan kebijakan baru di sini...
+            </div>
+            
+            <label for="upload-file">Upload File Kebijakan Baru (PDF/Doc/Txt):</label>
+            <input type="file" id="upload-file" accept=".pdf,.doc,.docx,.txt">
+            
+            <button id="add-kebijakan-btn">Tambah Kebijakan Baru</button>
+        </div>
+        
+        <div id="edit-form" class="hidden">
+            <p>Edit kebijakan:</p>
+            <div class="kebijakan-editor" contenteditable="true" id="edit-kebijakan-editor"></div>
+            
+            <label for="edit-upload-file">Upload File Baru (Opsional):</label>
+            <input type="file" id="edit-upload-file" accept=".pdf,.doc,.docx,.txt">
+            
+            <button id="save-edit-btn">Simpan Edit</button>
+            <button id="cancel-edit-btn">Batal</button>
+        </div>
+        
+        <button class="back-btn" onclick="window.location.href='dashboard-direktur.html'">Kembali ke Dashboard</button>
+        
+        <div class="saved-kebijakan" id="saved-section">
+            <h3>Kebijakan Tersimpan</h3>
+            <div id="display-saved"></div>
+        </div>
+    </div>
+
+    <script>
+        // Cek session
+        const role = localStorage.getItem('role');
+        const loggedIn = localStorage.getItem('loggedIn');
+        
+        if (loggedIn !== 'true' || role !== 'Direktur') {
+            alert('Akses ditolak.');
+            window.location.href = 'login-tenaga.html';
+        }
+        
+        // Load kebijakan tersimpan
+        let kebijakanList = JSON.parse(localStorage.getItem('kebijakanList')) || [];
+        let editIndex = -1;
+        displayKebijakan();
+        
+        // Fungsi encode file
+        function encodeFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Tambah kebijakan baru
+        document.getElementById('add-kebijakan-btn').addEventListener('click', async function() {
+            const kebijakanText = document.getElementById('kebijakan-editor').innerHTML.trim();
+            const fileInput = document.getElementById('upload-file');
+            let fileData = '';
+            let fileName = '';
+            
+            if (fileInput.files[0]) {
+                fileData = await encodeFileToBase64(fileInput.files[0]);
+                fileName = fileInput.files[0].name;
+            }
+            
+            if (kebijakanText) {
+                const newKebijakan = {
+                    text: kebijakanText,
+                    fileData: fileData,
+                    fileName: fileName,
+                    id: Date.now()
+                };
+                kebijakanList.push(newKebijakan);
+                localStorage.setItem('kebijakanList', JSON.stringify(kebijakanList));
+                alert('Kebijakan baru berhasil ditambahkan!');
+                document.getElementById('kebijakan-editor').innerHTML = '';
+                fileInput.value = '';
+                displayKebijakan();
+            } else {
+                alert('Harap isi teks kebijakan.');
+            }
+        });
+        
+        // Fungsi tampilkan kebijakan
+        function displayKebijakan() {
+            const displayDiv = document.getElementById('display-saved');
+            displayDiv.innerHTML = '';
+            if (kebijakanList.length === 0) {
+                displayDiv.textContent = 'Belum ada kebijakan yang ditambahkan.';
+            } else {
+                kebijakanList.forEach((kebijakan, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'kebijakan-item';
+                    itemDiv.innerHTML = '<h4>Kebijakan ' + (index + 1) + ':</h4><div>' + kebijakan.text + '</div>';
+                    if (kebijakan.fileName) {
+                        const fileLink = document.createElement('a');
+                        fileLink.href = kebijakan.fileData;
+                        fileLink.download = kebijakan.fileName;
+                        fileLink.textContent = 'Download File: ' + kebijakan.fileName;
+                        fileLink.className = 'file-link';
+                        itemDiv.appendChild(fileLink);
+                    }
+                    const buttonGroup = document.createElement('div');
+                    buttonGroup.className = 'button-group';
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.className = 'edit-btn';
+                    editBtn.onclick = () => startEdit(index);
+                    buttonGroup.appendChild(editBtn);
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Hapus';
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.onclick = () => deleteKebijakan(index);
+                    buttonGroup.appendChild(deleteBtn);
+                    itemDiv.appendChild(buttonGroup);
+                    displayDiv.appendChild(itemDiv);
+                });
+            }
+        }
+        
+        // Mulai edit
+        function startEdit(index) {
+            editIndex = index;
+            const kebijakan = kebijakanList[index];
+            document.getElementById('edit-kebijakan-editor').innerHTML = kebijakan.text;
+            document.getElementById('add-form').classList.add('hidden');
+            document.getElementById('edit-form').classList.remove('hidden');
+        }
+        
+        // Simpan edit
+        document.getElementById('save-edit-btn').addEventListener('click', async function() {
+            const kebijakanText = document.getElementById('edit-kebijakan-editor').innerHTML.trim();
+            const fileInput = document.getElementById('edit-upload-file');
+            let fileData = kebijakanList[editIndex].fileData;
+            let fileName = kebijakanList[editIndex].fileName;
+            
+            if (fileInput.files[0]) {
+                fileData = await encodeFileToBase64(fileInput.files[0]);
+                fileName = fileInput.files[0].name;
+            }
+            
+            if (kebijakanText) {
+                kebijakanList[editIndex].text = kebijakanText;
+                kebijakanList[editIndex].fileData = fileData;
+                kebijakanList[editIndex].fileName = fileName;
+                localStorage.setItem('kebijakanList', JSON.stringify(kebijakanList));
+                alert('Kebijakan berhasil diedit!');
+                document.getElementById('edit-form').classList.add('hidden');
+                document.getElementById('add-form').classList.remove('hidden');
+                displayKebijakan();
+            } else {
+                alert('Harap isi teks kebijakan.');
+            }
+        });
+        
+        // Batal edit
+        document.getElementById('cancel-edit-btn').addEventListener('click', function() {
+            document.getElementById('edit-form').classList.add('hidden');
+            document.getElementById('add-form').classList.remove('hidden');
+        });
+        
+        // Fungsi hapus kebijakan
+        function deleteKebijakan(index) {
+            if (confirm('Apakah Anda ingin menghapus kebijakan ini?')) {
+                kebijakanList.splice(index, 1);
+                localStorage.setItem('kebijakanList', JSON.stringify(kebijakanList));
+                displayKebijakan();
+            }
+        }
+    </script>
+</body>
+</html>
